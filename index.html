@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Nature Scene</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <script type="module">
+        import * as THREE from './three.module.js';
+        import { OrbitControls } from './OrbitControls.js';
+
+        // Scene, Camera, Renderer
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB); // Sky blue
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 2, 5);
+
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Ground
+        const groundGeometry = new THREE.PlaneGeometry(100, 100);
+        const groundMaterial = new THREE.MeshPhongMaterial({ color: 0x228B22 }); // Forest green
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        // Trees
+        const treeMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 }); // Brown trunk
+        const foliageMaterial = new THREE.MeshPhongMaterial({ color: 0x006400 }); // Dark green foliage
+
+        function createTree(x, z) {
+            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1), treeMaterial);
+            trunk.position.set(x, 0.5, z);
+
+            const foliage = new THREE.Mesh(new THREE.SphereGeometry(0.5, 16, 16), foliageMaterial);
+            foliage.position.set(x, 1.2, z);
+
+            scene.add(trunk, foliage);
+        }
+
+        for (let i = 0; i < 50; i++) {
+            const x = Math.random() * 50 - 25;
+            const z = Math.random() * 50 - 25;
+            createTree(x, z);
+        }
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0x404040, 1); // Soft white light
+        scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(5, 10, 7.5);
+        directionalLight.castShadow = true;
+        scene.add(directionalLight);
+
+        // Controls
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.target.set(0, 1, 0);
+        controls.update();
+
+        // Animate
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Responsive design
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
